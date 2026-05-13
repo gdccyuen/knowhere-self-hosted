@@ -8,12 +8,12 @@ on:
         required: true
         type: string
       api_ref:
-        description: knowhere-api git ref to include in the image
+        description: knowhere git ref to include in the image
         required: true
         default: staging
         type: string
       dashboard_ref:
-        description: knowhere-api-dashboard git ref to include in the image
+        description: knowhere-dashboard git ref to include in the image
         required: true
         default: staging
         type: string
@@ -53,26 +53,26 @@ jobs:
       - name: Checkout API source
         uses: actions/checkout@v4
         with:
-          repository: Ontos-AI/knowhere-api
+          repository: Ontos-AI/knowhere
           ref: ${{ inputs.api_ref }}
           token: ${{ secrets.KNOWHERE_RELEASE_SOURCE_TOKEN }}
-          path: .build/checkouts/knowhere-api
+          path: .build/checkouts/knowhere
 
       - name: Checkout dashboard source
         uses: actions/checkout@v4
         with:
-          repository: Ontos-AI/knowhere-api-dashboard
+          repository: Ontos-AI/knowhere-dashboard
           ref: ${{ inputs.dashboard_ref }}
           token: ${{ secrets.KNOWHERE_RELEASE_SOURCE_TOKEN }}
-          path: .build/checkouts/knowhere-api-dashboard
+          path: .build/checkouts/knowhere-dashboard
 
       - name: Resolve source revisions
         id: revisions
         shell: bash
         run: |
           set -euo pipefail
-          api_commit="$(git -C .build/checkouts/knowhere-api rev-parse HEAD)"
-          dashboard_commit="$(git -C .build/checkouts/knowhere-api-dashboard rev-parse HEAD)"
+          api_commit="$(git -C .build/checkouts/knowhere rev-parse HEAD)"
+          dashboard_commit="$(git -C .build/checkouts/knowhere-dashboard rev-parse HEAD)"
           build_time="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           {
             echo "api_commit=${api_commit}"
@@ -84,9 +84,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          KNOWHERE_API_SOURCE="${PWD}/.build/checkouts/knowhere-api" \
+          KNOWHERE_API_SOURCE="${PWD}/.build/checkouts/knowhere" \
             KNOWHERE_API_REF="HEAD" \
-            KNOWHERE_DASHBOARD_SOURCE="${PWD}/.build/checkouts/knowhere-api-dashboard" \
+            KNOWHERE_DASHBOARD_SOURCE="${PWD}/.build/checkouts/knowhere-dashboard" \
             KNOWHERE_DASHBOARD_REF="HEAD" \
             ./scripts/prepare-sources.sh
 
@@ -197,9 +197,9 @@ jobs:
             echo "- Aliyun ACR: \`${aliyun_digest_ref}\`"
             echo
             echo "Source revisions:"
-            echo "- knowhere: \`${GITHUB_SHA}\`"
-            echo "- knowhere-api: \`${API_REF}\` / \`${API_COMMIT}\`"
-            echo "- knowhere-api-dashboard: \`${DASHBOARD_REF}\` / \`${DASHBOARD_COMMIT}\`"
+            echo "- knowhere-self-hosted: \`${GITHUB_SHA}\`"
+            echo "- knowhere: \`${API_REF}\` / \`${API_COMMIT}\`"
+            echo "- knowhere-dashboard: \`${DASHBOARD_REF}\` / \`${DASHBOARD_COMMIT}\`"
             echo
             echo "Assets:"
             echo "- \`compose.yaml\`: Docker Compose starter file"

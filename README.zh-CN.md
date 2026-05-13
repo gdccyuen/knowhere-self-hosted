@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-Knowhere Self-Hosted 用于 Knowhere 的自托管部署。如果你想使用或了解 SaaS/API 版本，请查看 [Ontos-AI/knowhere-api](https://github.com/Ontos-AI/knowhere-api)。
+Knowhere Self-Hosted 用于 Knowhere 的自托管部署。如果你想使用或了解 SaaS/API 版本，请查看 [Ontos-AI/knowhere](https://github.com/Ontos-AI/knowhere)。
 
 ## 准备工作
 
