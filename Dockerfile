@@ -12,10 +12,10 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   && python -m pip install --no-cache-dir uv
 
-COPY .build/sources/knowhere-api/pyproject.toml .build/sources/knowhere-api/uv.lock ./
-COPY .build/sources/knowhere-api/packages/shared-python ./packages/shared-python
-COPY .build/sources/knowhere-api/apps/api/pyproject.toml ./apps/api/pyproject.toml
-COPY .build/sources/knowhere-api/apps/worker/pyproject.toml ./apps/worker/pyproject.toml
+COPY .build/sources/knowhere/pyproject.toml .build/sources/knowhere/uv.lock ./
+COPY .build/sources/knowhere/packages/shared-python ./packages/shared-python
+COPY .build/sources/knowhere/apps/api/pyproject.toml ./apps/api/pyproject.toml
+COPY .build/sources/knowhere/apps/worker/pyproject.toml ./apps/worker/pyproject.toml
 
 RUN cd apps/api \
   && UV_PROJECT_ENVIRONMENT=/opt/knowhere/venvs/api uv sync --locked --no-dev
@@ -29,10 +29,10 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   && python -m pip install --no-cache-dir uv
 
-COPY .build/sources/knowhere-api/pyproject.toml .build/sources/knowhere-api/uv.lock ./
-COPY .build/sources/knowhere-api/packages/shared-python ./packages/shared-python
-COPY .build/sources/knowhere-api/apps/api/pyproject.toml ./apps/api/pyproject.toml
-COPY .build/sources/knowhere-api/apps/worker/pyproject.toml ./apps/worker/pyproject.toml
+COPY .build/sources/knowhere/pyproject.toml .build/sources/knowhere/uv.lock ./
+COPY .build/sources/knowhere/packages/shared-python ./packages/shared-python
+COPY .build/sources/knowhere/apps/api/pyproject.toml ./apps/api/pyproject.toml
+COPY .build/sources/knowhere/apps/worker/pyproject.toml ./apps/worker/pyproject.toml
 
 RUN cd apps/worker \
   && UV_PROJECT_ENVIRONMENT=/opt/knowhere/venvs/worker uv sync --locked --no-dev \
@@ -48,7 +48,7 @@ WORKDIR /opt/knowhere/source/dashboard
 
 RUN corepack enable
 
-COPY .build/sources/knowhere-api-dashboard/package.json .build/sources/knowhere-api-dashboard/pnpm-lock.yaml ./
+COPY .build/sources/knowhere-dashboard/package.json .build/sources/knowhere-dashboard/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 FROM dashboard-deps AS dashboard-builder
@@ -57,7 +57,7 @@ ARG NEXT_PUBLIC_API_URL=http://127.0.0.1:5005/api
 ARG NEXT_PUBLIC_AUTH_BASE_URL=/api/auth
 ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-COPY .build/sources/knowhere-api-dashboard ./
+COPY .build/sources/knowhere-dashboard ./
 
 RUN BETTER_AUTH_SECRET=build-validation-only-auth-secret-32-chars \
   BETTER_AUTH_URL=http://localhost:3000 \
@@ -116,7 +116,7 @@ COPY --from=node-runtime /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=api-deps /opt/knowhere/venvs/api /opt/knowhere/venvs/api
 COPY --from=worker-deps /opt/knowhere/venvs/worker /opt/knowhere/venvs/worker
 
-COPY .build/sources/knowhere-api /opt/knowhere/source/api
+COPY .build/sources/knowhere /opt/knowhere/source/api
 COPY --from=dashboard-deps /opt/knowhere/source/dashboard/node_modules /opt/knowhere/dashboard/node_modules
 COPY --from=dashboard-builder /opt/knowhere/source/dashboard/package.json /opt/knowhere/dashboard/package.json
 COPY --from=dashboard-builder /opt/knowhere/source/dashboard/pnpm-lock.yaml /opt/knowhere/dashboard/pnpm-lock.yaml

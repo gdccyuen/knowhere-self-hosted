@@ -7,9 +7,9 @@ sourceRoot="${repoRoot}/.build/sources"
 
 # CI passes explicit checkout paths and refs. Local builds default to sibling
 # checkouts and archive their current HEAD unless these env vars are overridden.
-apiSource="${KNOWHERE_API_SOURCE:-${workspaceRoot}/knowhere-api}"
+apiSource="${KNOWHERE_API_SOURCE:-${workspaceRoot}/knowhere}"
 apiRef="${KNOWHERE_API_REF:-HEAD}"
-dashboardSource="${KNOWHERE_DASHBOARD_SOURCE:-${workspaceRoot}/knowhere-api-dashboard}"
+dashboardSource="${KNOWHERE_DASHBOARD_SOURCE:-${workspaceRoot}/knowhere-dashboard}"
 dashboardRef="${KNOWHERE_DASHBOARD_REF:-HEAD}"
 
 copySource() {
@@ -43,8 +43,8 @@ copySource() {
 }
 
 mkdir -p "$sourceRoot"
-copySource "$apiSource" "$apiRef" "${sourceRoot}/knowhere-api" "Knowhere API"
-copySource "$dashboardSource" "$dashboardRef" "${sourceRoot}/knowhere-api-dashboard" "Knowhere dashboard"
+copySource "$apiSource" "$apiRef" "${sourceRoot}/knowhere" "Knowhere API"
+copySource "$dashboardSource" "$dashboardRef" "${sourceRoot}/knowhere-dashboard" "Knowhere dashboard"
 
 echo "Prepared sources:"
 echo "  API:       ${apiSource} @ ${apiRef}"
