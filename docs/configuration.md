@@ -95,7 +95,7 @@ EMBEDDING_MODEL=text-embedding-v4
 | Variable | Usage | Example values |
 | --- | --- | --- |
 | `MINERU_URL` | MinerU API base URL. | `https://mineru.net/api/v4` |
-| `FORCE_MINERU_UPLOAD_ENABLED` | Force MinerU direct upload mode instead of reusable S3 URLs. | `true` |
+| `MINERU_UPLOAD_MODE_ENABLED` | Use MinerU direct upload mode instead of reusable S3 URLs. Self-hosted defaults this to `true` because local storage URLs are usually private to the compose network. | `true` |
 | `MINERU_TOKEN_RPM_LIMIT` | Per-minute request limit for each MinerU key. | `300` |
 | `MINERU_TOKEN_DAILY_LIMIT` | Daily request limit for each MinerU key. | `10000` |
 | `MINERU_TOKEN_COOLDOWN_SECONDS` | Cooldown seconds after a MinerU key is rate-limited. | `60` |

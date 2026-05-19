@@ -95,7 +95,7 @@ EMBEDDING_MODEL=text-embedding-v4
 | 变量 | 用途 | 示例值 |
 | --- | --- | --- |
 | `MINERU_URL` | MinerU API base URL。 | `https://mineru.net/api/v4` |
-| `FORCE_MINERU_UPLOAD_ENABLED` | 强制使用 MinerU 直传模式，不使用可复用 S3 URL。 | `true` |
+| `MINERU_UPLOAD_MODE_ENABLED` | 使用 MinerU 直传模式，不使用可复用 S3 URL。自托管默认设为 `true`，因为本地存储 URL 通常只在 compose 网络内可访问。 | `true` |
 | `MINERU_TOKEN_RPM_LIMIT` | 每个 MinerU Key 的每分钟请求上限。 | `300` |
 | `MINERU_TOKEN_DAILY_LIMIT` | 每个 MinerU Key 的每日请求上限。 | `10000` |
 | `MINERU_TOKEN_COOLDOWN_SECONDS` | MinerU Key 触发限流后的冷却秒数。 | `60` |
