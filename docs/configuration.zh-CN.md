@@ -58,8 +58,8 @@ Key 请从各服务商官网获取：
 | `ARK_URL` | 火山方舟 chat completions URL。 | `https://ark.cn-beijing.volces.com/api/v3/chat/completions` |
 | `NORMOL_MODEL` | 主要文本、表格理解和摘要模型。 | `deepseek-chat`、`qwen-plus` |
 | `HIERARCHY_LLM_MODEL` | 文档标题层级、目录识别模型；为空时回退到 `NORMOL_MODEL`。 | `deepseek-chat`、`qwen-plus` |
-| `IMAGE_MODEL` | 图片摘要、图集和 OCR 相关的默认视觉模型。 | `qwen-vl-plus` |
-| `IMAGE_MODEL_MAX` | 更高能力的图片问答和 OCR 模型。 | `qwen-vl-plus` |
+| `IMAGE_MODEL` | 图片摘要、图集和 OCR 相关的默认视觉模型。 | `qwen3.6-flash` |
+| `IMAGE_MODEL_MAX` | 更高能力的图片问答和 OCR 模型。 | `qwen3.6-flash` |
 | `EMBEDDING_MODEL` | 检索使用的 embedding 模型名。 | `text-embedding-v4` |
 | `OPENAI_CLIENT_TIMEOUT` | OpenAI-compatible 客户端超时时间，单位秒。 | `300` |
 | `LLM_MOCK_ENABLED` | 是否用 mock 响应短路 LLM 调用，主要用于测试。 | `false` |
@@ -85,8 +85,8 @@ HIERARCHY_LLM_MODEL=deepseek-chat
 ALI_API_KEYS=your-dashscope-api-key
 NORMOL_MODEL=qwen-plus
 HIERARCHY_LLM_MODEL=qwen-plus
-IMAGE_MODEL=qwen-vl-plus
-IMAGE_MODEL_MAX=qwen-vl-plus
+IMAGE_MODEL=qwen3.6-flash
+IMAGE_MODEL_MAX=qwen3.6-flash
 EMBEDDING_MODEL=text-embedding-v4
 ```
 
@@ -229,6 +229,7 @@ EMBEDDING_MODEL=text-embedding-v4
 | `SUPPORTED_EXTENSIONS` | 允许上传的文件扩展名，逗号分隔。 | `.doc,.docx,.pdf,.txt,.xls,.xlsx,.csv,.pptx,.jpg,.jpeg,.png,.md` |
 | `MAX_FILE_SIZE` | 最大文件大小，单位字节。 | `104857600` |
 | `MAX_IMAGE_SIZE` | 最大图片大小，单位字节。 | `10485760` |
+| `PDF_PROFILE_TOC_ENABLED` | 是否在文档画像阶段启用 PDF 目录抽取。 | `false` |
 | `USERS_DATA_PATH` | API 和 Worker 共享用户数据目录，必须是绝对路径。 | `/data/users` |
 | `TMP_PATH` | 应用临时目录。 | `/tmp/knowhere` |
 | `FONT_PATH` | 字体文件路径。 | `/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf` |
