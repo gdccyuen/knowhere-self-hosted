@@ -303,9 +303,10 @@ setDefault DS_URL https://api.deepseek.com/v1
 setDefault DS_KEY ""
 setDefault NORMOL_MODEL deepseek-chat
 setDefault HIERARCHY_LLM_MODEL "${NORMOL_MODEL}"
-setDefault IMAGE_MODEL qwen3.5-flash
+setDefault IMAGE_MODEL qwen3.6-flash
 setDefault IMAGE_MODEL_MAX "${IMAGE_MODEL}"
 setDefault EMBEDDING_MODEL text-embedding-v4
+setDefault PDF_PROFILE_TOC_ENABLED false
 setDefault GLM_URL https://open.bigmodel.cn/api/paas/v4
 setDefault ALI_URL https://dashscope.aliyuncs.com/compatible-mode/v1
 setDefault ARK_URL https://ark.cn-beijing.volces.com/api/v3/chat/completions

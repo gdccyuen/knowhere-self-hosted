@@ -36,8 +36,8 @@ MINERU_API_KEYS=your-mineru-api-key
 ALI_API_KEYS=your-dashscope-api-key
 NORMOL_MODEL=qwen-plus
 HIERARCHY_LLM_MODEL=qwen-plus
-IMAGE_MODEL=qwen-vl-plus
-IMAGE_MODEL_MAX=qwen-vl-plus
+IMAGE_MODEL=qwen3.6-flash
+IMAGE_MODEL_MAX=qwen3.6-flash
 ```
 
 `MINERU_API_KEYS` and `ALI_API_KEYS` support multiple keys separated by commas. Multiple keys are optional; they form a key pool so Knowhere can rotate requests across keys when one key reaches provider quota or rate limits.

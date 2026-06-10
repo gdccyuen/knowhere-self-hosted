@@ -36,8 +36,8 @@ MINERU_API_KEYS=your-mineru-api-key
 ALI_API_KEYS=your-dashscope-api-key
 NORMOL_MODEL=qwen-plus
 HIERARCHY_LLM_MODEL=qwen-plus
-IMAGE_MODEL=qwen-vl-plus
-IMAGE_MODEL_MAX=qwen-vl-plus
+IMAGE_MODEL=qwen3.6-flash
+IMAGE_MODEL_MAX=qwen3.6-flash
 ```
 
 `MINERU_API_KEYS` 和 `ALI_API_KEYS` 都支持多个 Key，用英文逗号分隔。多个 Key 不是必需的；它们会组成一个 Key 池，当某个 Key 触发限流时，Knowhere 可以轮换使用其他 Key。

@@ -58,8 +58,8 @@ Get keys from the providers' official websites:
 | `ARK_URL` | Volcengine Ark chat completions URL. | `https://ark.cn-beijing.volces.com/api/v3/chat/completions` |
 | `NORMOL_MODEL` | Main model for text, table understanding, and summarization. | `deepseek-chat`, `qwen-plus` |
 | `HIERARCHY_LLM_MODEL` | Model for document heading hierarchy and table-of-contents recognition. Falls back to `NORMOL_MODEL` when empty. | `deepseek-chat`, `qwen-plus` |
-| `IMAGE_MODEL` | Default vision model for image summaries, image collections, and OCR-related work. | `qwen-vl-plus` |
-| `IMAGE_MODEL_MAX` | Higher-capability model for image Q&A and OCR. | `qwen-vl-plus` |
+| `IMAGE_MODEL` | Default vision model for image summaries, image collections, and OCR-related work. | `qwen3.6-flash` |
+| `IMAGE_MODEL_MAX` | Higher-capability model for image Q&A and OCR. | `qwen3.6-flash` |
 | `EMBEDDING_MODEL` | Embedding model used for retrieval. | `text-embedding-v4` |
 | `OPENAI_CLIENT_TIMEOUT` | OpenAI-compatible client timeout, in seconds. | `300` |
 | `LLM_MOCK_ENABLED` | Whether to short-circuit LLM calls with mock responses, mainly for tests. | `false` |
@@ -85,8 +85,8 @@ Alibaba Cloud Model Studio DashScope example:
 ALI_API_KEYS=your-dashscope-api-key
 NORMOL_MODEL=qwen-plus
 HIERARCHY_LLM_MODEL=qwen-plus
-IMAGE_MODEL=qwen-vl-plus
-IMAGE_MODEL_MAX=qwen-vl-plus
+IMAGE_MODEL=qwen3.6-flash
+IMAGE_MODEL_MAX=qwen3.6-flash
 EMBEDDING_MODEL=text-embedding-v4
 ```
 
@@ -229,6 +229,7 @@ EMBEDDING_MODEL=text-embedding-v4
 | `SUPPORTED_EXTENSIONS` | Allowed upload file extensions, comma-separated. | `.doc,.docx,.pdf,.txt,.xls,.xlsx,.csv,.pptx,.jpg,.jpeg,.png,.md` |
 | `MAX_FILE_SIZE` | Maximum file size, in bytes. | `104857600` |
 | `MAX_IMAGE_SIZE` | Maximum image size, in bytes. | `10485760` |
+| `PDF_PROFILE_TOC_ENABLED` | Enable PDF table-of-contents extraction during document profiling. | `false` |
 | `USERS_DATA_PATH` | Shared user data directory for API and Worker. Must be an absolute path. | `/data/users` |
 | `TMP_PATH` | Application temporary directory. | `/tmp/knowhere` |
 | `FONT_PATH` | Font file path. | `/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf` |
