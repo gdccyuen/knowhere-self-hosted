@@ -320,7 +320,7 @@ EMBEDDING_MODEL=text-embedding-v4
 | `ENVIRONMENT` | API 运行环境，允许 `development`、`staging`、`production`。 | `production` |
 | `APP_ENV` | 部署环境标识，可为空或 `development`、`staging`、`production`。 | `production` |
 | `APP_TITLE` | API 标题。 | `Knowhere API` |
-| `APP_VERSION` | 应用版本；镜像也会注入构建版本。 | `1.0.0` |
+| `APP_VERSION` | 镜像构建提供的应用版本；通常不要在 `.env` 中设置。 | 镜像提供 |
 | `APP_DESCRIPTION` | API 描述。 | `Document ingestion, retrieval, and MCP backend` |
 | `ALGORITHM` | JWT 签名算法。 | `HS256` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | API access token 有效期，单位分钟。 | `10080` |

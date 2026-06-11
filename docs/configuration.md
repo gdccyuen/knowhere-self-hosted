@@ -325,7 +325,7 @@ an operator-facing configuration surface.
 | `ENVIRONMENT` | API runtime environment. Allows `development`, `staging`, and `production`. | `production` |
 | `APP_ENV` | Deployment environment marker. Can be empty, `development`, `staging`, or `production`. | `production` |
 | `APP_TITLE` | API title. | `Knowhere API` |
-| `APP_VERSION` | Application version. The image also injects the build version. | `1.0.0` |
+| `APP_VERSION` | Application version supplied by the image build. Usually do not set this in `.env`. | image-provided |
 | `APP_DESCRIPTION` | API description. | `Document ingestion, retrieval, and MCP backend` |
 | `ALGORITHM` | JWT signing algorithm. | `HS256` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | API access token validity period, in minutes. | `10080` |
