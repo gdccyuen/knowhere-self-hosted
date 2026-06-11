@@ -308,9 +308,17 @@ EMBEDDING_MODEL=text-embedding-v4
 | `DEBUG` | API debug 模式。 | `false` |
 | `LOGFIRE_TOKEN` | Logfire tracing token。 | `...` |
 | `MOESIF_APPLICATION_ID` | Moesif application ID。 | `...` |
+| `TELEMETRY_ENABLED` | 是否发送匿名自托管产品遥测。默认开启，可设置为 `false` 关闭。 | `true`、`false` |
+| `TELEMETRY_POSTHOG_HOST` | 匿名自托管遥测使用的 PostHog ingestion host。 | `https://us.i.posthog.com` |
+| `TELEMETRY_POSTHOG_PROJECT_KEY` | 匿名自托管遥测使用的 PostHog project token。 | `phc_...` |
+| `TELEMETRY_INSTALLATION_ID` | 可选的运维方指定匿名 UUID 安装 ID。留空时会自动生成并持久化。非 UUID 值会被拒绝。 | `550e8400-e29b-41d4-a716-446655440000` |
+| `TELEMETRY_INSTALLATION_ID_PATH` | 自动生成的匿名安装 ID 存储文件。默认路径位于 `knowhere_secrets` Docker volume。 | `/data/secrets/telemetry-installation-id` |
+| `TELEMETRY_DEPLOYMENT_MODE` | 写入匿名遥测事件的部署标签。 | `self_hosted_compose` |
 | `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project key。 | `phc_...` |
 | `NEXT_PUBLIC_POSTHOG_HOST` | PostHog host。 | `https://app.posthog.com` |
 | `GA_MEASUREMENT_ID` | Google Analytics measurement ID，格式如 `G-XXXXXXXXXX`。 | `G-ABC1234567` |
+
+匿名自托管遥测仅限安装、版本、健康事件以及聚合软件指标。事件属性不得包含 prompt、模型回复、检索 query、文档名、文件名、用户 ID、邮箱、组织 ID、IP 地址、Webhook URL、API Key、请求 body 或原始堆栈。使用默认直连 PostHog 端点时，PostHog 仍可能收到 HTTP 请求层面的常规来源网络元数据。
 
 ## 运行时和自托管启动控制
 

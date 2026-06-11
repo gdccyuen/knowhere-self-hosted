@@ -70,6 +70,18 @@ If pulling the default image from GHCR is slow or unavailable, use the Aliyun Do
 KNOWHERE_IMAGE=knowhere-registry.cn-shenzhen.cr.aliyuncs.com/knowhere/knowhere:latest
 ```
 
+Self-hosted deployments send anonymous product telemetry by default so the
+project can understand active self-hosted versions and basic service health. The
+telemetry uses a random installation id stored in the `knowhere_secrets` Docker
+volume and does not include prompts, document content, filenames, user identity,
+IP addresses, request bodies, or API keys in event properties. Because the
+default endpoint sends directly to PostHog, PostHog can still receive normal
+network-level source metadata for the HTTP request. To opt out:
+
+```bash
+TELEMETRY_ENABLED=false
+```
+
 ## 3. Start Knowhere
 
 ```bash

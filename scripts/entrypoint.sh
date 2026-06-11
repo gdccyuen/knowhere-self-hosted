@@ -314,6 +314,12 @@ setDefault ARK_URL https://ark.cn-beijing.volces.com/api/v3/chat/completions
 setDefault FRONTEND_URL "${NEXT_PUBLIC_APP_URL}"
 setDefault INTERNAL_DASHBOARD_ENDPOINT "http://127.0.0.1:${DASHBOARD_PORT}"
 setDefault QSTASH_CALLBACK_BASE_URL "http://127.0.0.1:${API_PORT}/api/v1"
+setDefault TELEMETRY_ENABLED "true"
+setDefault TELEMETRY_POSTHOG_HOST "https://us.i.posthog.com"
+setDefault TELEMETRY_POSTHOG_PROJECT_KEY "phc_5MQ7OffZTgxBejPdLMZ5mzxDg4jWHS4PFcbg9j5MmQm"
+setDefault TELEMETRY_INSTALLATION_ID ""
+setDefault TELEMETRY_INSTALLATION_ID_PATH "/data/secrets/telemetry-installation-id"
+setDefault TELEMETRY_DEPLOYMENT_MODE "self_hosted_compose"
 setDefault MOESIF_APPLICATION_ID ""
 setDefault LOGFIRE_TOKEN ""
 
