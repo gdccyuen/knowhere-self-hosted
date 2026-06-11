@@ -309,21 +309,14 @@ Billing is disabled by default for self-hosted deployments: `BILLING_ENABLED=fal
 | `LOGFIRE_TOKEN` | Logfire tracing token. | `...` |
 | `MOESIF_APPLICATION_ID` | Moesif application ID. | `...` |
 | `TELEMETRY_ENABLED` | Whether to send anonymous self-hosted product telemetry. Enabled by default and can be disabled with `false`. | `true`, `false` |
-| `TELEMETRY_POSTHOG_HOST` | PostHog ingestion host for anonymous self-hosted telemetry. | `https://us.i.posthog.com` |
-| `TELEMETRY_POSTHOG_PROJECT_KEY` | PostHog project token used for anonymous self-hosted telemetry ingestion. | `phc_...` |
-| `TELEMETRY_INSTALLATION_ID` | Optional operator-provided anonymous UUID installation id. Leave empty to generate and persist one automatically. Non-UUID values are rejected. | `550e8400-e29b-41d4-a716-446655440000` |
-| `TELEMETRY_INSTALLATION_ID_PATH` | Persistent file for the generated anonymous installation id. The default path lives in the `knowhere_secrets` Docker volume. | `/data/secrets/telemetry-installation-id` |
-| `TELEMETRY_DEPLOYMENT_MODE` | Deployment label attached to anonymous telemetry events. | `self_hosted_compose` |
-| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project key. | `phc_...` |
-| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog host. | `https://app.posthog.com` |
 | `GA_MEASUREMENT_ID` | Google Analytics measurement ID. Example format: `G-XXXXXXXXXX`. | `G-ABC1234567` |
 
 Anonymous self-hosted telemetry is limited to installation/version/health events
 and aggregate software metrics. It must not include prompts, responses,
 retrieval query text, document names, filenames, user ids, emails, organization
 ids, IP addresses, webhook URLs, API keys, request bodies, or raw stack traces
-as event properties. When using the default direct PostHog endpoint, PostHog can
-still receive normal network-level source metadata for the HTTP request.
+as event properties. The telemetry destination is managed by Knowhere and is not
+an operator-facing configuration surface.
 
 ## Runtime and Self-Hosted Startup Control
 

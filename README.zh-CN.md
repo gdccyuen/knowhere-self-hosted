@@ -70,7 +70,7 @@ API_HOST_BIND=0.0.0.0
 KNOWHERE_IMAGE=knowhere-registry.cn-shenzhen.cr.aliyuncs.com/knowhere/knowhere:latest
 ```
 
-自托管部署默认会发送匿名产品遥测，用于了解自托管版本分布和基础服务健康情况。遥测使用保存在 `knowhere_secrets` Docker volume 中的随机安装 ID，事件属性不会包含 prompt、文档内容、文件名、用户身份、IP 地址、请求 body 或 API Key。默认端点会直接发送到 PostHog，因此 PostHog 仍可能收到 HTTP 请求层面的常规来源网络元数据。如需关闭：
+自托管部署默认会发送匿名产品遥测，用于了解自托管版本分布和基础服务健康情况。遥测使用保存在 `knowhere_secrets` Docker volume 中的随机安装 ID，事件属性不会包含 prompt、文档内容、文件名、用户身份、IP 地址、请求 body 或 API Key。如需关闭：
 
 ```bash
 TELEMETRY_ENABLED=false
