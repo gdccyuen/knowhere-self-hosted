@@ -308,9 +308,10 @@ EMBEDDING_MODEL=text-embedding-v4
 | `DEBUG` | API debug 模式。 | `false` |
 | `LOGFIRE_TOKEN` | Logfire tracing token。 | `...` |
 | `MOESIF_APPLICATION_ID` | Moesif application ID。 | `...` |
-| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project key。 | `phc_...` |
-| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog host。 | `https://app.posthog.com` |
+| `TELEMETRY_ENABLED` | 是否发送匿名自托管产品遥测。默认开启，可设置为 `false` 关闭。 | `true`、`false` |
 | `GA_MEASUREMENT_ID` | Google Analytics measurement ID，格式如 `G-XXXXXXXXXX`。 | `G-ABC1234567` |
+
+匿名自托管遥测仅限安装、版本、健康事件以及聚合软件指标。事件属性不得包含 prompt、模型回复、检索 query、文档名、文件名、用户 ID、邮箱、组织 ID、IP 地址、Webhook URL、API Key、请求 body 或原始堆栈。遥测目标由 Knowhere 管理，不作为运维方需要配置的参数暴露。
 
 ## 运行时和自托管启动控制
 
@@ -319,7 +320,7 @@ EMBEDDING_MODEL=text-embedding-v4
 | `ENVIRONMENT` | API 运行环境，允许 `development`、`staging`、`production`。 | `production` |
 | `APP_ENV` | 部署环境标识，可为空或 `development`、`staging`、`production`。 | `production` |
 | `APP_TITLE` | API 标题。 | `Knowhere API` |
-| `APP_VERSION` | 应用版本；镜像也会注入构建版本。 | `1.0.0` |
+| `APP_VERSION` | 镜像构建提供的应用版本；通常不要在 `.env` 中设置。 | 镜像提供 |
 | `APP_DESCRIPTION` | API 描述。 | `Document ingestion, retrieval, and MCP backend` |
 | `ALGORITHM` | JWT 签名算法。 | `HS256` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | API access token 有效期，单位分钟。 | `10080` |

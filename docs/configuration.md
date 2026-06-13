@@ -308,9 +308,15 @@ Billing is disabled by default for self-hosted deployments: `BILLING_ENABLED=fal
 | `DEBUG` | API debug mode. | `false` |
 | `LOGFIRE_TOKEN` | Logfire tracing token. | `...` |
 | `MOESIF_APPLICATION_ID` | Moesif application ID. | `...` |
-| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project key. | `phc_...` |
-| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog host. | `https://app.posthog.com` |
+| `TELEMETRY_ENABLED` | Whether to send anonymous self-hosted product telemetry. Enabled by default and can be disabled with `false`. | `true`, `false` |
 | `GA_MEASUREMENT_ID` | Google Analytics measurement ID. Example format: `G-XXXXXXXXXX`. | `G-ABC1234567` |
+
+Anonymous self-hosted telemetry is limited to installation/version/health events
+and aggregate software metrics. It must not include prompts, responses,
+retrieval query text, document names, filenames, user ids, emails, organization
+ids, IP addresses, webhook URLs, API keys, request bodies, or raw stack traces
+as event properties. The telemetry destination is managed by Knowhere and is not
+an operator-facing configuration surface.
 
 ## Runtime and Self-Hosted Startup Control
 
@@ -319,7 +325,7 @@ Billing is disabled by default for self-hosted deployments: `BILLING_ENABLED=fal
 | `ENVIRONMENT` | API runtime environment. Allows `development`, `staging`, and `production`. | `production` |
 | `APP_ENV` | Deployment environment marker. Can be empty, `development`, `staging`, or `production`. | `production` |
 | `APP_TITLE` | API title. | `Knowhere API` |
-| `APP_VERSION` | Application version. The image also injects the build version. | `1.0.0` |
+| `APP_VERSION` | Application version supplied by the image build. Usually do not set this in `.env`. | image-provided |
 | `APP_DESCRIPTION` | API description. | `Document ingestion, retrieval, and MCP backend` |
 | `ALGORITHM` | JWT signing algorithm. | `HS256` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | API access token validity period, in minutes. | `10080` |
