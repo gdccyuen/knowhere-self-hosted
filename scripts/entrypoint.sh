@@ -301,7 +301,7 @@ setDefault SELF_HOSTED_STORAGE_CORS_ALLOWED_ORIGINS ""
 
 setDefault DS_URL https://api.deepseek.com/v1
 setDefault DS_KEY ""
-setDefault NORMOL_MODEL deepseek-chat
+setDefault NORMOL_MODEL deepseek-v4-flash
 setDefault HIERARCHY_LLM_MODEL "${NORMOL_MODEL}"
 setDefault IMAGE_MODEL qwen3.6-flash
 setDefault IMAGE_MODEL_MAX "${IMAGE_MODEL}"
