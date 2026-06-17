@@ -56,8 +56,8 @@ Key 请从各服务商官网获取：
 | `GLM_URL` | 智谱 GLM base URL。 | `https://open.bigmodel.cn/api/paas/v4` |
 | `ARK_API_KEY` | 火山方舟 API Key。 | `...` |
 | `ARK_URL` | 火山方舟 chat completions URL。 | `https://ark.cn-beijing.volces.com/api/v3/chat/completions` |
-| `NORMOL_MODEL` | 主要文本、表格理解和摘要模型。 | `deepseek-chat`、`qwen-plus` |
-| `HIERARCHY_LLM_MODEL` | 文档标题层级、目录识别模型；为空时回退到 `NORMOL_MODEL`。 | `deepseek-chat`、`qwen-plus` |
+| `NORMOL_MODEL` | 主要文本、表格理解和摘要模型。 | `deepseek-v4-flash`、`qwen-plus` |
+| `HIERARCHY_LLM_MODEL` | 文档标题层级、目录识别模型；为空时回退到 `NORMOL_MODEL`。 | `deepseek-v4-flash`、`qwen-plus` |
 | `IMAGE_MODEL` | 图片摘要、图集和 OCR 相关的默认视觉模型。 | `qwen3.6-flash` |
 | `IMAGE_MODEL_MAX` | 更高能力的图片问答和 OCR 模型。 | `qwen3.6-flash` |
 | `EMBEDDING_MODEL` | 检索使用的 embedding 模型名。 | `text-embedding-v4` |
@@ -75,8 +75,8 @@ DeepSeek 示例：
 
 ```bash
 DS_KEY=your-deepseek-api-key
-NORMOL_MODEL=deepseek-chat
-HIERARCHY_LLM_MODEL=deepseek-chat
+NORMOL_MODEL=deepseek-v4-flash
+HIERARCHY_LLM_MODEL=deepseek-v4-flash
 ```
 
 阿里云百炼示例：

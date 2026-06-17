@@ -56,8 +56,8 @@ Get keys from the providers' official websites:
 | `GLM_URL` | Zhipu GLM base URL. | `https://open.bigmodel.cn/api/paas/v4` |
 | `ARK_API_KEY` | Volcengine Ark API key. | `...` |
 | `ARK_URL` | Volcengine Ark chat completions URL. | `https://ark.cn-beijing.volces.com/api/v3/chat/completions` |
-| `NORMOL_MODEL` | Main model for text, table understanding, and summarization. | `deepseek-chat`, `qwen-plus` |
-| `HIERARCHY_LLM_MODEL` | Model for document heading hierarchy and table-of-contents recognition. Falls back to `NORMOL_MODEL` when empty. | `deepseek-chat`, `qwen-plus` |
+| `NORMOL_MODEL` | Main model for text, table understanding, and summarization. | `deepseek-v4-flash`, `qwen-plus` |
+| `HIERARCHY_LLM_MODEL` | Model for document heading hierarchy and table-of-contents recognition. Falls back to `NORMOL_MODEL` when empty. | `deepseek-v4-flash`, `qwen-plus` |
 | `IMAGE_MODEL` | Default vision model for image summaries, image collections, and OCR-related work. | `qwen3.6-flash` |
 | `IMAGE_MODEL_MAX` | Higher-capability model for image Q&A and OCR. | `qwen3.6-flash` |
 | `EMBEDDING_MODEL` | Embedding model used for retrieval. | `text-embedding-v4` |
@@ -75,8 +75,8 @@ DeepSeek example:
 
 ```bash
 DS_KEY=your-deepseek-api-key
-NORMOL_MODEL=deepseek-chat
-HIERARCHY_LLM_MODEL=deepseek-chat
+NORMOL_MODEL=deepseek-v4-flash
+HIERARCHY_LLM_MODEL=deepseek-v4-flash
 ```
 
 Alibaba Cloud Model Studio DashScope example:
