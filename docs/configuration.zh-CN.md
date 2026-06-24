@@ -218,9 +218,16 @@ EMBEDDING_MODEL=text-embedding-v4
 | `SELF_HOSTED_CREATE_STORAGE_BUCKETS` | 启动时自动创建 bucket。 | `true` |
 | `SELF_HOSTED_CONFIGURE_STORAGE_EVENTS` | 启动时自动配置上传事件。 | `true` |
 | `SELF_HOSTED_S3_EVENT_TOPIC_NAME` | LocalStack SNS topic 名称。 | `knowhere-s3-upload-events` |
-| `SELF_HOSTED_S3_EVENT_WEBHOOK_URL` | S3 上传事件回调到 API 的 URL。 | `http://app:5005/v1/internal/s3-events` |
+| `SELF_HOSTED_S3_EVENT_WEBHOOK_URL` | S3 上传事件回调到 API 的 URL。 | `http://app:5005/api/v1/internal/s3-events` |
 | `SELF_HOSTED_STORAGE_CORS_ALLOWED_ORIGINS` | Bucket CORS 允许来源，逗号分隔；为空时自动包含本地 Dashboard/API 地址。 | `https://knowhere.example.com` |
 | `SELF_HOSTED_AWS_ENDPOINT_URL` | 自托管存储初始化脚本使用的 AWS endpoint；为空时使用 `S3_ENDPOINT_URL`。 | `http://localstack:4566` |
+
+## 自托管进程控制
+
+| 变量 | 用途 | 示例值 |
+| --- | --- | --- |
+| `SELF_HOSTED_RUN_DASHBOARD_MIGRATIONS` | 启动时是否运行 Dashboard auth/account migrations。仅在恢复的数据库已经包含这些 schema 时关闭。 | `true`、`false` |
+| `SELF_HOSTED_START_DASHBOARD` | 启动时是否启动 Dashboard 进程。API-only 部署可关闭。 | `true`、`false` |
 
 ## 文件处理和检索
 

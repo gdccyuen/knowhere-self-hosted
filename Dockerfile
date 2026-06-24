@@ -130,14 +130,15 @@ COPY --from=dashboard-builder /opt/knowhere/source/dashboard/drizzle /opt/knowhe
 COPY --from=dashboard-builder /opt/knowhere/source/dashboard/lib/db /opt/knowhere/dashboard/lib/db
 
 COPY scripts/entrypoint.sh /usr/local/bin/knowhere-self-hosted-entrypoint
+COPY scripts/healthcheck.sh /usr/local/bin/knowhere-self-hosted-healthcheck
 COPY scripts/create-storage-buckets.py /usr/local/bin/knowhere-create-storage-buckets
 COPY scripts/configure-storage-events.py /usr/local/bin/knowhere-configure-storage-events
 
-RUN chmod +x /usr/local/bin/knowhere-self-hosted-entrypoint /usr/local/bin/knowhere-create-storage-buckets /usr/local/bin/knowhere-configure-storage-events
+RUN chmod +x /usr/local/bin/knowhere-self-hosted-entrypoint /usr/local/bin/knowhere-self-hosted-healthcheck /usr/local/bin/knowhere-create-storage-buckets /usr/local/bin/knowhere-configure-storage-events
 
 EXPOSE 3000 5005
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=5 \
-  CMD curl -fsS http://127.0.0.1:3000/login >/dev/null && curl -fsS http://127.0.0.1:5005/health >/dev/null || exit 1
+  CMD /usr/local/bin/knowhere-self-hosted-healthcheck
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/knowhere-self-hosted-entrypoint"]

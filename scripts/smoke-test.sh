@@ -13,12 +13,24 @@ export LOCALSTACK_HOST_PORT="${LOCALSTACK_HOST_PORT:-14566}"
 dashboardUrl="${DASHBOARD_SMOKE_URL:-http://127.0.0.1:${DASHBOARD_HOST_PORT}/login}"
 apiUrl="${API_SMOKE_URL:-http://127.0.0.1:${API_HOST_PORT}/health}"
 
-docker compose -p "$projectName" -f "$composeFile" up -d postgres redis localstack app
+composeServices=(postgres redis app)
+if [ "${SELF_HOSTED_INCLUDE_LOCALSTACK:-true}" = "true" ]; then
+  composeServices=(postgres redis localstack app)
+fi
+
+docker compose -p "$projectName" -f "$composeFile" up -d "${composeServices[@]}"
 
 for attempt in {1..90}; do
-  if curl -fsS "$apiUrl" >/dev/null 2>&1 && curl -fsS "$dashboardUrl" >/dev/null 2>&1; then
-    echo "Smoke test passed"
-    exit 0
+  if curl -fsS "$apiUrl" >/dev/null 2>&1; then
+    if [ "${SELF_HOSTED_START_DASHBOARD:-true}" != "true" ]; then
+      echo "Smoke test passed"
+      exit 0
+    fi
+
+    if curl -fsS "$dashboardUrl" >/dev/null 2>&1; then
+      echo "Smoke test passed"
+      exit 0
+    fi
   fi
 
   echo "Waiting for app smoke endpoints (${attempt}/90)..."

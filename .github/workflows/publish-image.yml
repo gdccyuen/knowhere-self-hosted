@@ -166,7 +166,9 @@ jobs:
 
           mkdir -p release-assets
           cp compose.yaml release-assets/compose.yaml
+          cp compose.aliyun-sjg.yaml release-assets/compose.aliyun-sjg.yaml
           cp .env.defaults release-assets/env.defaults
+          cp env.aliyun-sjg.example release-assets/env.aliyun-sjg.example
 
           ghcr_image_ref="${GHCR_IMAGE}:${IMAGE_TAG}"
           ghcr_digest_ref="${GHCR_IMAGE}@${IMAGE_DIGEST}"
@@ -203,7 +205,9 @@ jobs:
             echo
             echo "Assets:"
             echo "- \`compose.yaml\`: Docker Compose starter file"
+            echo "- \`compose.aliyun-sjg.yaml\`: API-only Docker Compose file for the Aliyun SJG single-VM deployment"
             echo "- \`env.defaults\`: default and reference environment variables"
+            echo "- \`env.aliyun-sjg.example\`: Aliyun SJG environment template"
             echo "- \`image-digest.txt\`: immutable image digests"
             echo "- \`source-revisions.txt\`: source refs included in this image"
           } > release-notes.md
@@ -223,7 +227,9 @@ jobs:
 
           gh release create "${IMAGE_TAG}" \
             release-assets/compose.yaml \
+            release-assets/compose.aliyun-sjg.yaml \
             release-assets/env.defaults \
+            release-assets/env.aliyun-sjg.example \
             release-assets/image-digest.txt \
             release-assets/source-revisions.txt \
             "${release_args[@]}"

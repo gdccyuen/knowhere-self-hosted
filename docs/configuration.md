@@ -218,9 +218,16 @@ EMBEDDING_MODEL=text-embedding-v4
 | `SELF_HOSTED_CREATE_STORAGE_BUCKETS` | Whether startup creates buckets automatically. | `true` |
 | `SELF_HOSTED_CONFIGURE_STORAGE_EVENTS` | Whether startup configures upload events automatically. | `true` |
 | `SELF_HOSTED_S3_EVENT_TOPIC_NAME` | LocalStack SNS topic name. | `knowhere-s3-upload-events` |
-| `SELF_HOSTED_S3_EVENT_WEBHOOK_URL` | S3 upload event callback URL to the API. | `http://app:5005/v1/internal/s3-events` |
+| `SELF_HOSTED_S3_EVENT_WEBHOOK_URL` | S3 upload event callback URL to the API. | `http://app:5005/api/v1/internal/s3-events` |
 | `SELF_HOSTED_STORAGE_CORS_ALLOWED_ORIGINS` | Allowed bucket CORS origins, comma-separated. Empty values automatically include local Dashboard/API URLs. | `https://knowhere.example.com` |
 | `SELF_HOSTED_AWS_ENDPOINT_URL` | AWS endpoint used by the self-hosted storage initialization script. Uses `S3_ENDPOINT_URL` when empty. | `http://localstack:4566` |
+
+## Self-Hosted Process Control
+
+| Variable | Usage | Example values |
+| --- | --- | --- |
+| `SELF_HOSTED_RUN_DASHBOARD_MIGRATIONS` | Whether startup runs Dashboard auth/account migrations. Disable only when restoring a database that already has those schemas. | `true`, `false` |
+| `SELF_HOSTED_START_DASHBOARD` | Whether startup launches the Dashboard process. Disable for API-only deployments. | `true`, `false` |
 
 ## File Processing and Retrieval
 

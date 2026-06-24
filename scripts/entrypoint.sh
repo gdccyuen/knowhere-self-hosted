@@ -155,6 +155,11 @@ configureStorageEvents() {
 }
 
 runDashboardMigrations() {
+  if ! isEnabled "${SELF_HOSTED_RUN_DASHBOARD_MIGRATIONS:-true}"; then
+    echo "Skipping dashboard auth/account migrations"
+    return
+  fi
+
   echo "Running dashboard auth/account migrations"
   (
     cd "$dashboardRoot"
@@ -196,6 +201,11 @@ startWorker() {
 }
 
 startDashboard() {
+  if ! isEnabled "${SELF_HOSTED_START_DASHBOARD:-true}"; then
+    echo "Skipping Knowhere dashboard startup"
+    return
+  fi
+
   echo "Starting Knowhere dashboard on port ${DASHBOARD_PORT}"
   (
     cd "$dashboardRoot"
@@ -261,6 +271,8 @@ setDefault BETTER_AUTH_URL "${NEXT_PUBLIC_APP_URL}"
 
 setDefault SELF_HOSTED_SECRETS_PATH /data/secrets
 setDefault SELF_HOSTED_INIT_POSTGRES_EXTENSIONS true
+setDefault SELF_HOSTED_RUN_DASHBOARD_MIGRATIONS true
+setDefault SELF_HOSTED_START_DASHBOARD true
 loadOrCreateSecret SECRET_KEY "${SELF_HOSTED_SECRETS_PATH}/secret-key"
 loadOrCreateSecret BETTER_AUTH_SECRET "${SELF_HOSTED_SECRETS_PATH}/better-auth-secret"
 loadOrCreateSecret USERS_VERIFY_TOKEN_SECRET "${SELF_HOSTED_SECRETS_PATH}/users-verify-token-secret"
@@ -296,7 +308,7 @@ setDefault SNS_SIGNATURE_VERIFICATION false
 setDefault SELF_HOSTED_CREATE_STORAGE_BUCKETS true
 setDefault SELF_HOSTED_CONFIGURE_STORAGE_EVENTS true
 setDefault SELF_HOSTED_S3_EVENT_TOPIC_NAME knowhere-s3-upload-events
-setDefault SELF_HOSTED_S3_EVENT_WEBHOOK_URL "http://app:${API_PORT}/v1/internal/s3-events"
+setDefault SELF_HOSTED_S3_EVENT_WEBHOOK_URL "http://app:${API_PORT}/api/v1/internal/s3-events"
 setDefault SELF_HOSTED_STORAGE_CORS_ALLOWED_ORIGINS ""
 
 setDefault DS_URL https://api.deepseek.com/v1
@@ -343,7 +355,10 @@ configureStorageEvents
 startWorker
 startDashboard
 
-wait -n "$apiPid" "$workerPid" "$dashboardPid"
+runningPids=("$apiPid" "$workerPid")
+[ -n "$dashboardPid" ] && runningPids+=("$dashboardPid")
+
+wait -n "${runningPids[@]}"
 exitCode="$?"
 echo "A Knowhere self-hosted process exited with code ${exitCode}; stopping remaining processes"
 stopChildren TERM
