@@ -230,6 +230,10 @@ EMBEDDING_MODEL=text-embedding-v4
 | `MAX_FILE_SIZE` | Maximum file size, in bytes. | `104857600` |
 | `MAX_IMAGE_SIZE` | Maximum image size, in bytes. | `10485760` |
 | `PDF_PROFILE_TOC_ENABLED` | Enable PDF table-of-contents extraction during document profiling. | `false` |
+| `RETRIEVAL_PAGE_MEMORY_ENABLED` | Enable the page-memory parse track for PDF/PPTX. Keep disabled until the page-memory rollout is intentionally enabled. | `false` |
+| `PAGE_MEMORY_ASSET_EXTRACTION_ENABLED` | Detect and extract page-track figures, charts, and tables. Requires VLM credentials and a Java runtime for table extraction. | `false` |
+| `PAGE_MEMORY_ASSET_SUMMARY_ENABLED` | Re-summarize extracted page-track assets with numeric/entity extraction. | `false` |
+| `PAGE_MEMORY_MAX_PAGES` | Maximum page count accepted by the page-memory track. | `1500` |
 | `USERS_DATA_PATH` | Shared user data directory for API and Worker. Must be an absolute path. | `/data/users` |
 | `TMP_PATH` | Application temporary directory. | `/tmp/knowhere` |
 | `FONT_PATH` | Font file path. | `/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf` |
@@ -347,7 +351,8 @@ These fields are retained for legacy code paths or internal path conventions. Mo
 
 | Variable | Usage | Example values |
 | --- | --- | --- |
-| `ALL_DF_COLS` | Legacy dataframe column definition. | `content,path,type,length,keywords,summary,know_id,tokens,connectto,addtime,page_nums` |
+| `ALL_DF_COLS` | Parser dataframe column definition. Keep the trailing `entities,asset_title` columns for typed entities and asset captions. | `content,path,type,length,keywords,summary,know_id,tokens,connectto,addtime,page_nums,entities,asset_title` |
+| `ENTITY_TYPES` | Seed vocabulary for typed entity extraction in summaries. Empty values let the model choose types, but the seed list keeps graph links consistent. | `person,location,organization` |
 | `DEFAULT_FOLDERS` | Legacy default folder list. | `Supplementary_Files,Temporary_Files,templates,images,fragments` |
 | `KB_TERM` | Legacy knowledge base data directory name. | `KB_DATA` |
 | `KB_VEC_TERM` | Legacy knowledge base vector directory name. | `KB_VECS` |

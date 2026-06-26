@@ -230,6 +230,10 @@ EMBEDDING_MODEL=text-embedding-v4
 | `MAX_FILE_SIZE` | 最大文件大小，单位字节。 | `104857600` |
 | `MAX_IMAGE_SIZE` | 最大图片大小，单位字节。 | `10485760` |
 | `PDF_PROFILE_TOC_ENABLED` | 是否在文档画像阶段启用 PDF 目录抽取。 | `false` |
+| `RETRIEVAL_PAGE_MEMORY_ENABLED` | 是否为 PDF/PPTX 启用 page-memory 解析链路。在明确 rollout 前保持关闭。 | `false` |
+| `PAGE_MEMORY_ASSET_EXTRACTION_ENABLED` | 是否检测并抽取 page-track 图、图表和表格；需要 VLM 凭证，表格抽取还需要 Java 运行时。 | `false` |
+| `PAGE_MEMORY_ASSET_SUMMARY_ENABLED` | 是否对抽取出的 page-track 资产重新做数值/实体摘要。 | `false` |
+| `PAGE_MEMORY_MAX_PAGES` | page-memory 链路允许处理的最大页数。 | `1500` |
 | `USERS_DATA_PATH` | API 和 Worker 共享用户数据目录，必须是绝对路径。 | `/data/users` |
 | `TMP_PATH` | 应用临时目录。 | `/tmp/knowhere` |
 | `FONT_PATH` | 字体文件路径。 | `/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf` |
@@ -342,7 +346,8 @@ EMBEDDING_MODEL=text-embedding-v4
 
 | 变量 | 用途 | 示例值 |
 | --- | --- | --- |
-| `ALL_DF_COLS` | 旧版 dataframe 列定义。 | `content,path,type,length,keywords,summary,know_id,tokens,connectto,addtime,page_nums` |
+| `ALL_DF_COLS` | Parser dataframe 列定义；保留末尾 `entities,asset_title`，用于类型化实体和资产标题。 | `content,path,type,length,keywords,summary,know_id,tokens,connectto,addtime,page_nums,entities,asset_title` |
+| `ENTITY_TYPES` | 摘要实体抽取的种子类型；留空时模型可自行选择类型，但种子列表能保持图谱链接更稳定。 | `person,location,organization` |
 | `DEFAULT_FOLDERS` | 旧版默认目录列表。 | `Supplementary_Files,Temporary_Files,templates,images,fragments` |
 | `KB_TERM` | 旧版知识库数据目录名。 | `KB_DATA` |
 | `KB_VEC_TERM` | 旧版知识库向量目录名。 | `KB_VECS` |
