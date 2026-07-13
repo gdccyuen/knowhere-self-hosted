@@ -311,12 +311,58 @@ Billing is disabled by default for self-hosted deployments: `BILLING_ENABLED=fal
 | `TELEMETRY_ENABLED` | Whether to send anonymous self-hosted product telemetry. Enabled by default and can be disabled with `false`. | `true`, `false` |
 | `GA_MEASUREMENT_ID` | Google Analytics measurement ID. Example format: `G-XXXXXXXXXX`. | `G-ABC1234567` |
 
-Anonymous self-hosted telemetry is limited to installation/version/health events
-and aggregate software metrics. It must not include prompts, responses,
-retrieval query text, document names, filenames, user ids, emails, organization
-ids, IP addresses, webhook URLs, API keys, request bodies, or raw stack traces
-as event properties. The telemetry destination is managed by Knowhere and is not
-an operator-facing configuration surface.
+### Anonymous product telemetry
+
+Self-hosted API instances send anonymous product telemetry by default
+(`TELEMETRY_ENABLED=true`) so Ontos can measure OSS adoption, version mix, and
+basic fleet health. Telemetry uses a random installation id stored in the
+`knowhere_secrets` Docker volume. The telemetry destination is managed by
+Knowhere and is not an operator-facing configuration surface.
+
+**Opt out.** Set the following in `.env` and restart:
+
+```bash
+TELEMETRY_ENABLED=false
+```
+
+**Privacy.** Events are limited to installation/version/health signals and
+aggregate software metrics. Event properties must not include prompts,
+responses, retrieval query text, document names, filenames, user ids, emails,
+organization ids, IP addresses, geo location, webhook URLs, API keys, request
+bodies, or raw stack traces. Document types and client names are allowlisted
+enums only; free-form metadata is stripped before send.
+
+**Schema.** Events use `schema_version = 2026-07-telemetry-v2`.
+
+**Allowlists**
+
+| Field | Allowed values |
+| --- | --- |
+| `document_type` | `pdf`, `docx`, `doc`, `xlsx`, `xls`, `pptx`, `ppt`, `csv`, `txt`, `md`, `html`, `image`, `other` |
+| `created_by_client` | `cli`, `node-sdk`, `dashboard`, `notebook`, `mcp`, `api`, `other` |
+| `source_type` (via counts) | `file`, `url`, `other` |
+
+Success rate fields use `done / (done + failed)` over the same 24h window
+(non-terminal jobs excluded) and are reported as a float in **0–1**.
+
+**Events and properties**
+
+| Event | Purpose | Notable properties |
+| --- | --- | --- |
+| `self_hosted_instance_started` | Instance boot | Base props only (`app_version`, `schema_version`, deployment flags, …) |
+| `self_hosted_instance_heartbeat` | Periodic liveness | `api_healthy`, `postgres_healthy`, `redis_healthy`, `uptime_bucket` |
+| `self_hosted_instance_shutdown` | Graceful stop | Base props |
+| `self_hosted_usage_aggregate` | Core usage KPIs | `jobs_created_24h`, `completed_jobs_24h` / `failed_jobs_24h`, `success_rate_24h`, `job_duration_p95_seconds_24h`, `pages_processed_24h`, `source_*_jobs_24h`, capability buckets |
+| `self_hosted_worker_aggregate` | Queue / backlog | Pending/running/converting counts, duration averages |
+| `self_hosted_retrieval_aggregate` | Retrieval volume | Runs, latency, cache hits, tokens (counts only) |
+| `self_hosted_api_aggregate` | API request mix | Status-class counts, latency avg/p95 |
+| `self_hosted_provider_aggregate` | Provider / webhook volume | Token and error counts (no model prompts) |
+| `self_hosted_document_type_aggregate` | Docs by type | `document_type`, jobs/pages/success rate (never filenames) |
+| `self_hosted_client_aggregate` | Jobs by client | `created_by_client`, jobs created/done/failed, `success_rate_24h` |
+
+Base properties on every event include `app_version`, `app_env`, `environment`,
+`deployment_mode`, `service_name`, `schema_version`, and boolean deployment
+flags such as `billing_enabled` and `rate_limit_enabled`.
 
 ## Runtime and Self-Hosted Startup Control
 
