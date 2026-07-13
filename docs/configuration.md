@@ -339,7 +339,7 @@ enums only; free-form metadata is stripped before send.
 | Field | Allowed values |
 | --- | --- |
 | `document_type` | `pdf`, `docx`, `doc`, `xlsx`, `xls`, `pptx`, `ppt`, `csv`, `txt`, `md`, `html`, `image`, `other` |
-| `created_by_client` | `cli`, `node-sdk`, `dashboard`, `notebook`, `mcp`, `api`, `other` |
+| `created_by_client` | `cli`, `node-sdk`, `notebook`, `mcp`, `api`, `other` |
 | `source_type` (via counts) | `file`, `url`, `other` |
 
 Success rate fields use `done / (done + failed)` over the same 24h window

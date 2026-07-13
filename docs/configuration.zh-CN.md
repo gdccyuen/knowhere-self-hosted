@@ -330,7 +330,7 @@ TELEMETRY_ENABLED=false
 | 字段 | 允许值 |
 | --- | --- |
 | `document_type` | `pdf`、`docx`、`doc`、`xlsx`、`xls`、`pptx`、`ppt`、`csv`、`txt`、`md`、`html`、`image`、`other` |
-| `created_by_client` | `cli`、`node-sdk`、`dashboard`、`notebook`、`mcp`、`api`、`other` |
+| `created_by_client` | `cli`、`node-sdk`、`notebook`、`mcp`、`api`、`other` |
 | `source_type`（通过计数体现） | `file`、`url`、`other` |
 
 成功率字段在同一 24 小时窗口内按 `done / (done + failed)` 计算（排除非终态任务），并以 **0–1** 的浮点数上报。
