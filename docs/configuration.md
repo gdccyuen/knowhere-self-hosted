@@ -349,16 +349,16 @@ Success rate fields use `done / (done + failed)` over the same 24h window
 
 | Event | Purpose | Notable properties |
 | --- | --- | --- |
-| `self_hosted_instance_started` | Instance boot | Base props only (`app_version`, `schema_version`, deployment flags, …) |
-| `self_hosted_instance_heartbeat` | Periodic liveness | `api_healthy`, `postgres_healthy`, `redis_healthy`, `uptime_bucket` |
-| `self_hosted_instance_shutdown` | Graceful stop | Base props |
-| `self_hosted_usage_aggregate` | Core usage KPIs | `jobs_created_24h`, `completed_jobs_24h` / `failed_jobs_24h`, `success_rate_24h`, `job_duration_p95_seconds_24h`, `pages_processed_24h`, `source_*_jobs_24h`, capability buckets |
-| `self_hosted_worker_aggregate` | Queue / backlog | Pending/running/converting counts, duration averages |
-| `self_hosted_retrieval_aggregate` | Retrieval volume | Runs, latency, cache hits, tokens (counts only) |
-| `self_hosted_api_aggregate` | API request mix | Status-class counts, latency avg/p95 |
-| `self_hosted_provider_aggregate` | Provider / webhook volume | Token and error counts (no model prompts) |
-| `self_hosted_document_type_aggregate` | Docs by type | `document_type`, jobs/pages/success rate (never filenames) |
-| `self_hosted_client_aggregate` | Jobs by client | `created_by_client`, jobs created/done/failed, `success_rate_24h` |
+| `oss_instance_started` | Instance boot | Base props only (`app_version`, `schema_version`, deployment flags, …) |
+| `oss_instance_heartbeat` | Periodic liveness | `api_healthy`, `postgres_healthy`, `redis_healthy`, `uptime_bucket` |
+| `oss_instance_shutdown` | Graceful stop | Base props |
+| `oss_usage_aggregate` | Core usage KPIs | `jobs_created_24h`, `completed_jobs_24h` / `failed_jobs_24h`, `success_rate_24h`, `job_duration_p95_seconds_24h`, `pages_processed_24h`, `source_*_jobs_24h`, capability buckets |
+| `oss_worker_aggregate` | Queue / backlog | Pending/running/converting counts, duration averages |
+| `oss_retrieval_aggregate` | Retrieval volume | Runs, latency, cache hits, tokens (counts only) |
+| `oss_api_aggregate` | API request mix | Status-class counts, latency avg/p95 |
+| `oss_provider_aggregate` | Provider / webhook volume | Token and error counts (no model prompts) |
+| `oss_document_type_aggregate` | Docs by type | `document_type`, jobs/pages/success rate (never filenames) |
+| `oss_client_aggregate` | Jobs by client | `created_by_client`, jobs created/done/failed, `success_rate_24h` |
 
 Base properties on every event include `app_version`, `app_env`, `environment`,
 `deployment_mode`, `service_name`, `schema_version`, and boolean deployment

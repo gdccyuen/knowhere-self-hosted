@@ -339,16 +339,16 @@ TELEMETRY_ENABLED=false
 
 | 事件 | 用途 | 主要属性 |
 | --- | --- | --- |
-| `self_hosted_instance_started` | 实例启动 | 仅基础属性（`app_version`、`schema_version`、部署开关等） |
-| `self_hosted_instance_heartbeat` | 周期性存活探测 | `api_healthy`、`postgres_healthy`、`redis_healthy`、`uptime_bucket` |
-| `self_hosted_instance_shutdown` | 优雅关闭 | 基础属性 |
-| `self_hosted_usage_aggregate` | 核心用量 KPI | `jobs_created_24h`、`completed_jobs_24h` / `failed_jobs_24h`、`success_rate_24h`、`job_duration_p95_seconds_24h`、`pages_processed_24h`、`source_*_jobs_24h`、能力桶 |
-| `self_hosted_worker_aggregate` | 队列 / 积压 | pending/running/converting 计数、耗时均值 |
-| `self_hosted_retrieval_aggregate` | 检索量 | 次数、延迟、缓存命中、token（仅计数） |
-| `self_hosted_api_aggregate` | API 请求分布 | 状态码分段计数、延迟 avg/p95 |
-| `self_hosted_provider_aggregate` | Provider / Webhook 量 | token 与错误计数（不含模型 prompt） |
-| `self_hosted_document_type_aggregate` | 按文档类型 | `document_type`、任务/页数/成功率（永不包含文件名） |
-| `self_hosted_client_aggregate` | 按客户端 | `created_by_client`、创建/完成/失败任务数、`success_rate_24h` |
+| `oss_instance_started` | 实例启动 | 仅基础属性（`app_version`、`schema_version`、部署开关等） |
+| `oss_instance_heartbeat` | 周期性存活探测 | `api_healthy`、`postgres_healthy`、`redis_healthy`、`uptime_bucket` |
+| `oss_instance_shutdown` | 优雅关闭 | 基础属性 |
+| `oss_usage_aggregate` | 核心用量 KPI | `jobs_created_24h`、`completed_jobs_24h` / `failed_jobs_24h`、`success_rate_24h`、`job_duration_p95_seconds_24h`、`pages_processed_24h`、`source_*_jobs_24h`、能力桶 |
+| `oss_worker_aggregate` | 队列 / 积压 | pending/running/converting 计数、耗时均值 |
+| `oss_retrieval_aggregate` | 检索量 | 次数、延迟、缓存命中、token（仅计数） |
+| `oss_api_aggregate` | API 请求分布 | 状态码分段计数、延迟 avg/p95 |
+| `oss_provider_aggregate` | Provider / Webhook 量 | token 与错误计数（不含模型 prompt） |
+| `oss_document_type_aggregate` | 按文档类型 | `document_type`、任务/页数/成功率（永不包含文件名） |
+| `oss_client_aggregate` | 按客户端 | `created_by_client`、创建/完成/失败任务数、`success_rate_24h` |
 
 每个事件的基础属性包括 `app_version`、`app_env`、`environment`、`deployment_mode`、`service_name`、`schema_version`，以及 `billing_enabled`、`rate_limit_enabled` 等布尔部署开关。
 
