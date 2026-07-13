@@ -70,11 +70,8 @@ API_HOST_BIND=0.0.0.0
 KNOWHERE_IMAGE=knowhere-registry.cn-shenzhen.cr.aliyuncs.com/knowhere/knowhere:latest
 ```
 
-自托管部署默认会发送匿名产品遥测，用于了解自托管版本分布和基础服务健康情况。遥测使用保存在 `knowhere_secrets` Docker volume 中的随机安装 ID，事件属性不会包含 prompt、文档内容、文件名、用户身份、IP 地址、请求 body 或 API Key。如需关闭：
-
-```bash
-TELEMETRY_ENABLED=false
-```
+自托管部署默认会发送匿名产品遥测（`TELEMETRY_ENABLED=true`）。遥测使用随机安装 ID 与聚合指标，不包含 prompt、文件名、用户身份或请求 body。如需关闭，设置 `TELEMETRY_ENABLED=false`。事件目录、隐私边界与属性表见
+[匿名产品遥测](docs/configuration.zh-CN.md#匿名产品遥测)。
 
 ## 3. 启动服务
 

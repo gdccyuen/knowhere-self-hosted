@@ -311,7 +311,46 @@ EMBEDDING_MODEL=text-embedding-v4
 | `TELEMETRY_ENABLED` | 是否发送匿名自托管产品遥测。默认开启，可设置为 `false` 关闭。 | `true`、`false` |
 | `GA_MEASUREMENT_ID` | Google Analytics measurement ID，格式如 `G-XXXXXXXXXX`。 | `G-ABC1234567` |
 
-匿名自托管遥测仅限安装、版本、健康事件以及聚合软件指标。事件属性不得包含 prompt、模型回复、检索 query、文档名、文件名、用户 ID、邮箱、组织 ID、IP 地址、Webhook URL、API Key、请求 body 或原始堆栈。遥测目标由 Knowhere 管理，不作为运维方需要配置的参数暴露。
+### 匿名产品遥测
+
+自托管 API 实例默认会发送匿名产品遥测（`TELEMETRY_ENABLED=true`），用于了解开源/自托管采用情况、版本分布和基础集群健康。遥测使用保存在 `knowhere_secrets` Docker volume 中的随机安装 ID。遥测目标由 Knowhere 管理，不作为运维方需要配置的参数暴露。
+
+**关闭遥测。** 在 `.env` 中设置以下变量并重启：
+
+```bash
+TELEMETRY_ENABLED=false
+```
+
+**隐私边界。** 事件仅限安装/版本/健康信号以及聚合软件指标。事件属性不得包含 prompt、模型回复、检索 query、文档名、文件名、用户 ID、邮箱、组织 ID、IP 地址、地理位置、Webhook URL、API Key、请求 body 或原始堆栈。文档类型与客户端名称仅使用允许列表枚举；自由文本元数据会在发送前被剥离。
+
+**Schema。** 事件使用 `schema_version = 2026-07-telemetry-v2`。
+
+**允许列表**
+
+| 字段 | 允许值 |
+| --- | --- |
+| `document_type` | `pdf`、`docx`、`doc`、`xlsx`、`xls`、`pptx`、`ppt`、`csv`、`txt`、`md`、`html`、`image`、`other` |
+| `created_by_client` | `cli`、`node-sdk`、`notebook`、`mcp`、`api`、`other` |
+| `source_type`（通过计数体现） | `file`、`url`、`other` |
+
+成功率字段在同一 24 小时窗口内按 `done / (done + failed)` 计算（排除非终态任务），并以 **0–1** 的浮点数上报。
+
+**事件与属性**
+
+| 事件 | 用途 | 主要属性 |
+| --- | --- | --- |
+| `oss_instance_started` | 实例启动 | 仅基础属性（`app_version`、`schema_version`、部署开关等） |
+| `oss_instance_heartbeat` | 周期性存活探测 | `api_healthy`、`postgres_healthy`、`redis_healthy`、`uptime_bucket` |
+| `oss_instance_shutdown` | 优雅关闭 | 基础属性 |
+| `oss_usage_aggregate` | 核心用量 KPI | `jobs_created_24h`、`completed_jobs_24h` / `failed_jobs_24h`、`success_rate_24h`、`job_duration_p95_seconds_24h`、`pages_processed_24h`、`source_*_jobs_24h`、能力桶 |
+| `oss_worker_aggregate` | 队列 / 积压 | pending/running/converting 计数、耗时均值 |
+| `oss_retrieval_aggregate` | 检索量 | 次数、延迟、缓存命中、token（仅计数） |
+| `oss_api_aggregate` | API 请求分布 | 状态码分段计数、延迟 avg/p95 |
+| `oss_provider_aggregate` | Provider / Webhook 量 | token 与错误计数（不含模型 prompt） |
+| `oss_document_type_aggregate` | 按文档类型 | `document_type`、任务/页数/成功率（永不包含文件名） |
+| `oss_client_aggregate` | 按客户端 | `created_by_client`、创建/完成/失败任务数、`success_rate_24h` |
+
+每个事件的基础属性包括 `app_version`、`app_env`、`environment`、`deployment_mode`、`service_name`、`schema_version`，以及 `billing_enabled`、`rate_limit_enabled` 等布尔部署开关。
 
 ## 运行时和自托管启动控制
 
