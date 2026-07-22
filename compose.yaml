@@ -20,6 +20,7 @@ services:
       - knowhere_user_data:/data/users
       - knowhere_model_cache:/data/models
       - knowhere_secrets:/data/secrets
+      - ./patches/pdf_service.py:/opt/knowhere/source/api/apps/worker/app/services/document_parser/providers/mineru/pdf_service.py:ro
 
   postgres:
     image: postgres:15-alpine

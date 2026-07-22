@@ -3,3 +3,7 @@
 logs/
 __pycache__/
 *.pyc
+.venv/
+og.pdf
+try_parse_doc.py
+try_pdf.py
