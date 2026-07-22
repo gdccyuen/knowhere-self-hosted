@@ -1,0 +1,157 @@
+name: Publish forked image
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Image tag to publish, e.g. v0.1.6-local.1
+        required: true
+        type: string
+      knowhere_base_tag:
+        description: Upstream Knowhere base image tag to fork from
+        required: true
+        default: v0.1.6
+        type: string
+      run_smoke_e2e:
+        description: Run end-to-end parse smoke after publish (requires LLM keys in CI secrets)
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches:
+      - main
+    paths:
+      - patches/**
+      - Dockerfile.forked
+      - compose.yaml
+      - .env.defaults
+      - .github/workflows/publish-forked-image.yml
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  FORKED_IMAGE: ghcr.io/gdccyuen/knowhere-self-hosted
+
+concurrency:
+  group: publish-forked-image-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  drift-check:
+    name: Verify patch applies cleanly to upstream
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      knowhere_base_tag: ${{ steps.resolve.outputs.knowhere_base_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve base tag
+        id: resolve
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "knowhere_base_tag=${{ inputs.knowhere_base_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            tag="$(grep -E '^KNOWHERE_BASE_TAG=' .env.defaults | cut -d= -f2)"
+            echo "knowhere_base_tag=${tag}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run drift check
+        env:
+          KNOWHERE_BASE_TAG: ${{ steps.resolve.outputs.knowhere_base_tag }}
+        run: bash scripts/check-patch-drift.sh
+
+  publish:
+    name: Build and publish forked image
+    needs: drift-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve metadata
+        id: meta
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            tag="${{ inputs.image_tag }}"
+            publish_latest="true"
+          else
+            tag="main-${GITHUB_SHA::7}"
+            publish_latest="false"
+          fi
+          {
+            echo "tag=${tag}"
+            echo "publish_latest=${publish_latest}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.forked
+          push: true
+          tags: |
+            ${{ env.FORKED_IMAGE }}:${{ steps.meta.outputs.tag }}
+            ${{ env.FORKED_IMAGE }}:latest
+          build-args: |
+            KNOWHERE_BASE_TAG=${{ needs.drift-check.outputs.knowhere_base_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create GitHub release (tag pushes only)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: ${{ steps.meta.outputs.tag }}
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+          KNOWHERE_BASE_TAG: ${{ needs.drift-check.outputs.knowhere_base_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Forked image ${IMAGE_TAG}"
+            echo ""
+            echo "Built from upstream \`ghcr.io/ontos-ai/knowhere:${KNOWHERE_BASE_TAG}\` with local MinerU patch."
+            echo ""
+            echo "Image: \`${FORKED_IMAGE}:${IMAGE_TAG}\`"
+            echo "Digest: \`${FORKED_IMAGE}@${IMAGE_DIGEST}\`"
+          } > release-notes.md
+          gh release create "${IMAGE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "${IMAGE_TAG}" \
+            --notes-file release-notes.md
+
+  smoke:
+    name: Startup smoke against published image
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve image tag
+        id: resolve
+        shell: bash
+        run: echo "tag=${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+
+      - name: Run startup smoke
+        env:
+          KNOWHERE_IMAGE: ${{ env.FORKED_IMAGE }}:${{ steps.resolve.outputs.tag }}
+        run: bash scripts/smoke-test.sh

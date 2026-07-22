@@ -1,0 +1,17 @@
+ARG KNOWHERE_BASE_TAG=v0.1.6
+FROM ghcr.io/ontos-ai/knowhere:${KNOWHERE_BASE_TAG}
+
+LABEL org.opencontainers.image.title="Knowhere Self-Hosted (forked)"
+LABEL org.opencontainers.image.description="Forked Knowhere image with local MinerU mode patch"
+
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends patch \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY patches/pdf_service.patch /tmp/pdf_service.patch
+
+RUN cd /opt/knowhere/source/api \
+    && patch -p1 --no-backup-if-mismatch < /tmp/pdf_service.patch \
+    && rm /tmp/pdf_service.patch \
+    && python -c "import ast; ast.parse(open('apps/worker/app/services/document_parser/providers/mineru/pdf_service.py').read())"

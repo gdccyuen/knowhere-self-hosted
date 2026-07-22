@@ -21,7 +21,8 @@ Docker Compose reads `.env.defaults` first, then reads `.env`. `.env.defaults` i
 | `REDIS_HOST_PORT` | Host port mapped to Redis. | `6379` |
 | `LOCALSTACK_HOST_BIND` | Host interface bound by the LocalStack port. Keep the default unless external S3-compatible tooling must connect directly. | `127.0.0.1`, `0.0.0.0` |
 | `LOCALSTACK_HOST_PORT` | Host port mapped to the LocalStack S3-compatible service. | `4566` |
-| `KNOWHERE_IMAGE` | Knowhere self-hosted Docker image. | `ghcr.io/ontos-ai/knowhere:latest` |
+| `KNOWHERE_IMAGE` | Knowhere self-hosted Docker image. Defaults to the upstream image; set to the forked image (`ghcr.io/gdccyuen/knowhere-self-hosted:latest`) when using the forked Dockerfile in this repo. | `ghcr.io/ontos-ai/knowhere:latest` |
+| `KNOWHERE_BASE_TAG` | Upstream Knowhere image tag forked by `Dockerfile.forked`. Bump explicitly before rebuilding the forked image; pair with `scripts/check-patch-drift.sh`. | `v0.1.6` |
 
 For networks where GHCR is slow or unavailable, use the Aliyun registry image:
 
@@ -38,6 +39,8 @@ KNOWHERE_IMAGE=knowhere-registry.cn-shenzhen.cr.aliyuncs.com/knowhere/knowhere:l
 | `ALI_API_KEYS` | Alibaba Cloud Model Studio DashScope API key pool. Set this when using Qwen models. The format is the same as `MINERU_API_KEYS`. | `sk-...` |
 
 `MINERU_API_KEYS` and `ALI_API_KEYS` support multiple keys so they can form a key pool. When one key reaches provider quota or rate limits, Knowhere can rotate to another key. A single key also works.
+
+`MINERU_API_KEYS` is required when `MINERU_LOCAL_MODE=false` (the cloud MinerU flow). When `MINERU_LOCAL_MODE=true`, `MINERU_API_KEYS` is unused and may be left empty.
 
 Get keys from the providers' official websites:
 
@@ -94,8 +97,13 @@ EMBEDDING_MODEL=text-embedding-v4
 
 | Variable | Usage | Example values |
 | --- | --- | --- |
-| `MINERU_URL` | MinerU API base URL. | `https://mineru.net/api/v4` |
-| `MINERU_UPLOAD_MODE_ENABLED` | Use MinerU direct upload mode instead of reusable S3 URLs. Self-hosted defaults this to `true` because local storage URLs are usually private to the compose network. | `true` |
+| `MINERU_URL` | MinerU API base URL. Defaults to the MinerU cloud service. Override to point at a self-hosted MinerU instance when using `MINERU_LOCAL_MODE=true`. | `https://mineru.net/api/v4`, `http://host.docker.internal:8000` |
+| `MINERU_UPLOAD_MODE_ENABLED` | Use MinerU direct upload mode instead of reusable S3 URLs. Self-hosted defaults this to `true` because local storage URLs are usually private to the compose network. Has no effect on PDF parsing when `MINERU_LOCAL_MODE=true`; still governs PPTX rendered-PDF cache reuse via LocalStack S3 presigned URLs. | `true` |
+| `MINERU_LOCAL_MODE` | Route PDF parsing to a self-hosted MinerU `/file_parse` endpoint instead of cloud-only batch APIs. Skips the MinerU cloud key pool entirely. See [Local MinerU mode](#local-mineru-mode). | `false`, `true` |
+| `MINERU_LOCAL_LANG_LIST` | Comma-separated OCR language list passed to local MinerU `/file_parse`. Local MinerU does **not** accept `auto`; pick from `ch`, `ch_server`, `korean`, `ta`, `te`, `ka`, `th`, `el`, `arabic`, `east_slavic`, `cyrillic`, `devanagari`. `ch` covers Chinese, English, Japanese, Traditional Chinese, and Latin scripts. | `ch`, `ch,korean` |
+| `MINERU_LOCAL_BACKEND` | Local MinerU parsing backend. `pipeline` is CPU-only and supports multiple languages; `vlm-engine`/`hybrid-engine` require GPU and support Chinese/English documents only. | `pipeline`, `vlm-engine`, `hybrid-engine` |
+| `MINERU_LOCAL_TIMEOUT` | Single-shard HTTP timeout for local MinerU `/file_parse`, in seconds. Includes queue wait when the local MinerU processes shards serially (`max_concurrent_requests=1`). | `3600` |
+| `MINERU_SHARD_CONCURRENCY` | Number of shards to parse in parallel when a PDF is split. Reduce to `1` when running `MINERU_LOCAL_MODE=true` against a single-concurrency MinerU. | `3` |
 | `MINERU_TOKEN_RPM_LIMIT` | Per-minute request limit for each MinerU key. | `300` |
 | `MINERU_TOKEN_DAILY_LIMIT` | Daily request limit for each MinerU key. | `10000` |
 | `MINERU_TOKEN_COOLDOWN_SECONDS` | Cooldown seconds after a MinerU key is rate-limited. | `60` |
@@ -115,6 +123,33 @@ EMBEDDING_MODEL=text-embedding-v4
 | `ILOVEAPI_TOKEN_RPM_LIMIT` | Per-minute request limit for each iLoveAPI project. | `25` |
 | `ILOVEAPI_TOKEN_DAILY_LIMIT` | Daily file limit for each iLoveAPI project. | `250` |
 | `ILOVEAPI_MAX_CONCURRENT` | Maximum concurrent iLoveAPI conversions. | `5` |
+
+### Local MinerU mode
+
+Set `MINERU_LOCAL_MODE=true` to route PDF parsing to a self-hosted MinerU `/file_parse` endpoint instead of MinerU's cloud-only batch APIs. This is useful for fully offline or private deployments that don't depend on `mineru.net`.
+
+Minimum configuration:
+
+```bash
+MINERU_LOCAL_MODE=true
+MINERU_URL=http://host.docker.internal:8000
+```
+
+`host.docker.internal` resolves to the Docker host via `extra_hosts: [host.docker.internal:host-gateway]` in `compose.yaml`. Point `MINERU_URL` at whatever address the container can reach your MinerU instance on (LAN IP, Tailscale hostname, etc.).
+
+The forked image in this repo (`Dockerfile.forked`) applies `patches/pdf_service.patch` against the upstream Knowhere image to enable this mode. Verify the patch still applies after bumping `KNOWHERE_BASE_TAG`:
+
+```bash
+bash scripts/check-patch-drift.sh
+```
+
+Behavioral notes:
+
+- `MINERU_API_KEYS` is **not required** in local mode. The MinerU cloud key pool is bypassed entirely.
+- Shards of oversized PDFs are still submitted to local MinerU in parallel according to `MINERU_SHARD_CONCURRENCY`. Most local MinerU deployments expose `max_concurrent_requests=1`, which serializes the queued requests. Set `MINERU_SHARD_CONCURRENCY=1` to avoid stacking shards in the queue.
+- `MINERU_LOCAL_TIMEOUT` is per-shard. With `MINERU_SHARD_CONCURRENCY > 1` and `max_concurrent_requests=1`, the Nth shard's HTTP timeout counts the queue wait for all prior shards. The default `3600` covers most cases; raise it for very large documents.
+- `MINERU_UPLOAD_MODE_ENABLED` has no effect on PDF parsing in local mode. It still controls whether PPTX rendered-PDF cache reuse attempts to use LocalStack S3 presigned URLs.
+- Either `DS_KEY` or `ALI_API_KEYS` is still required. Knowhere uses LLM models for heading prediction, summarization, and image analysis regardless of MinerU mode. Vision-capable models are required for image analysis — text-only models like `deepseek-v4-flash` will fail when Knowhere sends `image_url` content blocks.
 
 ## Dashboard, Auth, and Branding
 

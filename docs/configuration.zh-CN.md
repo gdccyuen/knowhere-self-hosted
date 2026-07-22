@@ -21,7 +21,8 @@ Docker Compose 会先读取 `.env.defaults`，再读取 `.env`。`.env.defaults`
 | `REDIS_HOST_PORT` | Redis 映射到宿主机的端口。 | `6379` |
 | `LOCALSTACK_HOST_BIND` | LocalStack 端口绑定的宿主机网卡地址。除非外部 S3 兼容工具必须直连，否则保持默认值。 | `127.0.0.1`、`0.0.0.0` |
 | `LOCALSTACK_HOST_PORT` | LocalStack S3 兼容存储映射到宿主机的端口。 | `4566` |
-| `KNOWHERE_IMAGE` | Knowhere 自托管镜像。 | `ghcr.io/ontos-ai/knowhere:latest` |
+| `KNOWHERE_IMAGE` | Knowhere 自托管镜像。默认使用上游镜像；如使用本仓库的 Forked 镜像，可设为 `ghcr.io/gdccyuen/knowhere-self-hosted:latest`。 | `ghcr.io/ontos-ai/knowhere:latest` |
+| `KNOWHERE_BASE_TAG` | `Dockerfile.forked` 所基于的上游 Knowhere 镜像 tag。升级前请先用 `scripts/check-patch-drift.sh` 验证补丁仍然有效。 | `v0.1.6` |
 
 国内网络可使用阿里云镜像：
 
@@ -38,6 +39,8 @@ KNOWHERE_IMAGE=knowhere-registry.cn-shenzhen.cr.aliyuncs.com/knowhere/knowhere:l
 | `ALI_API_KEYS` | 阿里云百炼 DashScope API Key 池。使用 Qwen 模型时填写，格式同 `MINERU_API_KEYS`。 | `sk-...` |
 
 `MINERU_API_KEYS` 和 `ALI_API_KEYS` 支持多个 Key 是为了组成 Key 池，在单个 Key 触发额度或限流时可以轮换使用其他 Key。只有一个 Key 也可以正常运行。
+
+当 `MINERU_LOCAL_MODE=false`（默认云端 MinerU 流程）时 `MINERU_API_KEYS` 为必填。当 `MINERU_LOCAL_MODE=true` 时，`MINERU_API_KEYS` 不会被使用，可以留空。
 
 Key 请从各服务商官网获取：
 
@@ -94,8 +97,13 @@ EMBEDDING_MODEL=text-embedding-v4
 
 | 变量 | 用途 | 示例值 |
 | --- | --- | --- |
-| `MINERU_URL` | MinerU API base URL。 | `https://mineru.net/api/v4` |
-| `MINERU_UPLOAD_MODE_ENABLED` | 使用 MinerU 直传模式，不使用可复用 S3 URL。自托管默认设为 `true`，因为本地存储 URL 通常只在 compose 网络内可访问。 | `true` |
+| `MINERU_URL` | MinerU API base URL。本地模式下指向自托管 MinerU 地址，例如 `http://host.docker.internal:8000`。 | `https://mineru.net/api/v4`、`http://host.docker.internal:8000` |
+| `MINERU_UPLOAD_MODE_ENABLED` | 使用 MinerU 直传模式，不使用可复用 S3 URL。自托管默认设为 `true`，因为本地存储 URL 通常只在 compose 网络内可访问。`MINERU_LOCAL_MODE=true` 时该变量对 PDF 解析无影响；但仍然控制 PPTX 渲染缓存复用是否走 LocalStack S3 预签名 URL。 | `true` |
+| `MINERU_LOCAL_MODE` | 将 PDF 解析路由到自托管 MinerU 的 `/file_parse` 端点，而非云端批量 API。开启后不再使用 MinerU 云端 Key 池。详见 [本地 MinerU 模式](#本地-mineru-模式)。 | `false`、`true` |
+| `MINERU_LOCAL_LANG_LIST` | 传给本地 MinerU `/file_parse` 的 OCR 语言列表（逗号分隔）。本地 MinerU **不接受 `auto`**，允许值：`ch`、`ch_server`、`korean`、`ta`、`te`、`ka`、`th`、`el`、`arabic`、`east_slavic`、`cyrillic`、`devanagari`。`ch` 覆盖中文、英文、日文、繁体中文和拉丁文。仅在 `MINERU_LOCAL_MODE=true` 时生效。 | `ch` |
+| `MINERU_LOCAL_BACKEND` | 本地 MinerU 解析后端。允许值：`pipeline`、`vlm-engine`、`hybrid-engine`、`vlm-http-client`、`hybrid-http-client`。`pipeline` 纯 CPU 且支持多语言；VLM 系后端需要 GPU。仅在 `MINERU_LOCAL_MODE=true` 时生效。 | `pipeline` |
+| `MINERU_LOCAL_TIMEOUT` | 本地 MinerU `/file_parse` 单分片 HTTP 超时，单位秒。当 `MINERU_SHARD_CONCURRENCY > 1` 且 MinerU `max_concurrent_requests=1` 时，包含队列等待时间。仅在 `MINERU_LOCAL_MODE=true` 时生效。 | `3600` |
+| `MINERU_SHARD_CONCURRENCY` | 大 PDF 分片后并行解析的分片数。当本地 MinerU `max_concurrent_requests=1` 时建议设为 `1`，避免分片在队列中堆积。 | `3` |
 | `MINERU_TOKEN_RPM_LIMIT` | 每个 MinerU Key 的每分钟请求上限。 | `300` |
 | `MINERU_TOKEN_DAILY_LIMIT` | 每个 MinerU Key 的每日请求上限。 | `10000` |
 | `MINERU_TOKEN_COOLDOWN_SECONDS` | MinerU Key 触发限流后的冷却秒数。 | `60` |

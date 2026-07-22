@@ -7,7 +7,7 @@ Knowhere Self-Hosted packages Knowhere for self-hosted deployments. If you want 
 ## Requirements
 
 - Docker and Docker Compose.
-- A MinerU API key for the initial parsing of PDF documents.
+- A MinerU API key for the initial parsing of PDF documents (not required if you run a local MinerU instance — see [Local MinerU mode](#local-mineru-mode)).
 - LLM provider API key: DeepSeek or Alibaba Cloud Model Studio DashScope.
 
 For now, our setup uses MinerU as the default PDF parser. If you customize the parsing pipeline, your own parser can also work as long as it produces Markdown (`.md`) files for Knowhere to process. If you'd like to contribute support for additional PDF parsers, feel free to submit a pull request.
@@ -76,6 +76,17 @@ metrics only — not prompts, filenames, user identity, or request bodies. To op
 out, set `TELEMETRY_ENABLED=false`. See
 [Anonymous product telemetry](docs/configuration.md#anonymous-product-telemetry)
 for the event catalog, privacy bounds, and property tables.
+
+## Local MinerU mode
+
+To run Knowhere against a self-hosted MinerU instance instead of `mineru.net`, set the following in `.env`:
+
+```bash
+MINERU_LOCAL_MODE=true
+MINERU_URL=http://host.docker.internal:8000
+```
+
+`MINERU_API_KEYS` is not required in this mode. The container reaches your local MinerU via `host.docker.internal`, which `compose.yaml` maps to the Docker host on Linux, Docker Desktop, and OrbStack. See [Local MinerU mode](docs/configuration.md#local-mineru-mode) in the configuration reference for parameter tuning, shard concurrency, and timeouts.
 
 ## 3. Start Knowhere
 

@@ -1,0 +1,203 @@
+--- a/apps/worker/app/services/document_parser/providers/mineru/pdf_service.py
++++ b/apps/worker/app/services/document_parser/providers/mineru/pdf_service.py
+@@ -1,10 +1,14 @@
++import io
+ import os
++import pathlib
++import zipfile
+ from typing import Optional
+ 
+ import requests
+ from app.services.document_parser.providers.mineru.client import (
+     get_mineru_headers,
+     get_mineru_session,
++    get_retry_after_seconds,
+     mineru_logger,
+     raise_mineru_unavailable,
+ )
+@@ -30,7 +34,46 @@
+     settings.MINERU_UPLOAD_READ_TIMEOUT,
+ )
+ 
++_MINERU_LOCAL_MODE = os.environ.get("MINERU_LOCAL_MODE", "false").lower() == "true"
++_MINERU_LOCAL_LANG_LIST = [
++    s.strip() for s in os.environ.get("MINERU_LOCAL_LANG_LIST", "ch").split(",") if s.strip()
++]
++_MINERU_LOCAL_BACKEND = os.environ.get("MINERU_LOCAL_BACKEND", "pipeline")
++_MINERU_LOCAL_TIMEOUT = int(os.environ.get("MINERU_LOCAL_TIMEOUT", "3600"))
+ 
++
++def _build_local_mineru_session() -> requests.Session:
++    from requests.adapters import HTTPAdapter
++    from urllib3.util.retry import Retry
++
++    session = requests.Session()
++    retry_strategy = Retry(
++        total=settings.MINERU_UPLOAD_RETRY_TOTAL,
++        backoff_factor=settings.MINERU_UPLOAD_RETRY_BACKOFF_FACTOR,
++        status_forcelist=[429, 502, 503, 504],
++        allowed_methods=["GET", "POST", "PUT"],
++        raise_on_status=False,
++        read=0,
++    )
++    adapter = HTTPAdapter(
++        pool_connections=1,
++        pool_maxsize=settings.MINERU_POOL_MAXSIZE,
++    )
++    session.mount("https://", adapter)
++    session.mount("http://", adapter)
++    return session
++
++
++_local_mineru_session: Optional[requests.Session] = None
++
++
++def _get_local_mineru_session() -> requests.Session:
++    global _local_mineru_session
++    if _local_mineru_session is None:
++        _local_mineru_session = _build_local_mineru_session()
++    return _local_mineru_session
++
++
+ def _should_use_mineru_s3_url_mode(s3_key: Optional[str]) -> bool:
+     return not settings.MINERU_UPLOAD_MODE_ENABLED and s3_key is not None
+ 
+@@ -138,7 +181,128 @@
+     return s3_key
+ 
+ 
++def _flatten_extracted_zip(output_dir: str, keep_exts: tuple[str, ...]) -> None:
++    dest = pathlib.Path(output_dir)
++    for extracted_path in dest.rglob("*"):
++        if not extracted_path.is_file():
++            continue
++        if extracted_path.suffix.lower() not in keep_exts:
++            extracted_path.unlink()
++            continue
++        target = dest / extracted_path.relative_to(dest)
++        if extracted_path != target:
++            target.parent.mkdir(parents=True, exist_ok=True)
++            extracted_path.rename(target)
++    for directory in sorted(
++        [p for p in dest.rglob("*") if p.is_dir()],
++        key=lambda p: len(p.parts),
++        reverse=True,
++    ):
++        try:
++            next(directory.iterdir())
++        except StopIteration:
++            directory.rmdir()
+ 
++
++def parse_via_local(pdf_path: str, filename: str, output_dir: str) -> None:
++    local_logger = mineru_logger(
++        "local_parse",
++        operation="local_file_parse",
++        filename=filename,
++    )
++
++    if is_remote(pdf_path):
++        raise MinerUServiceException(
++            internal_message="Local MinerU mode does not support remote URLs; "
++            "pdf_path must be a local file",
++        )
++
++    url = f"{settings.MINERU_URL}/file_parse"
++    local_logger.info("Posting PDF to local MinerU /file_parse")
++    with open(pdf_path, "rb") as f:
++        response = _get_local_mineru_session().post(
++            url,
++            files={"files": (filename, f)},
++            data={
++                "lang_list": _MINERU_LOCAL_LANG_LIST,
++                "backend": _MINERU_LOCAL_BACKEND,
++                "parse_method": "auto",
++                "return_md": True,
++                "return_images": True,
++                "response_format_zip": True,
++            },
++            timeout=_MINERU_LOCAL_TIMEOUT,
++        )
++
++    if response.status_code == 429:
++        retry_after = get_retry_after_seconds(
++            response, settings.MINERU_TOKEN_COOLDOWN_SECONDS
++        )
++        local_logger.bind(
++            status_code=response.status_code,
++            retry_after=retry_after,
++        ).warning("Local MinerU /file_parse rate-limited")
++        raise UnavailableException(
++            internal_message="Local MinerU rate limited during /file_parse",
++            retry_after=retry_after,
++            limit=0,
++            period="minute",
++            user_message="Document processing is busy right now. Please retry shortly.",
++        )
++
++    if response.status_code != 200:
++        local_logger.bind(status_code=response.status_code).error(
++            "Local MinerU /file_parse failed"
++        )
++        raise MinerUServiceException(
++            internal_message=f"Local MinerU /file_parse failed: {response.text}",
++            status_code=response.status_code,
++        )
++
++    content_type = response.headers.get("content-type", "")
++    if "zip" in content_type or response.content[:4] == b"PK\x03\x04":
++        local_logger.info("Received ZIP from local MinerU, extracting")
++        os.makedirs(output_dir, exist_ok=True)
++        zip_bytes = io.BytesIO(response.content)
++        keep_exts = (".md", ".jpg", ".jpeg", ".png", ".gif")
++        with zipfile.ZipFile(zip_bytes, "r") as zf:
++            zf.extractall(output_dir)
++        _flatten_extracted_zip(output_dir, keep_exts)
++        md_files = list(pathlib.Path(output_dir).rglob("*.md"))
++        if not md_files:
++            raise MinerUServiceException(
++                internal_message="Local MinerU ZIP contained no markdown file",
++            )
++        if len(md_files) > 1:
++            raise MinerUServiceException(
++                internal_message=(
++                    "Local MinerU ZIP contained multiple markdown files: "
++                    f"{[str(p.relative_to(output_dir)) for p in md_files]}"
++                ),
++            )
++        md_src = md_files[0]
++        full_md_path = pathlib.Path(output_dir) / "full.md"
++        if md_src != full_md_path:
++            md_src.rename(full_md_path)
++        local_logger.info("Local MinerU ZIP extraction complete")
++    else:
++        local_logger.info("Received JSON from local MinerU, writing full.md")
++        result = response.json()
++        if result.get("code") is not None and result.get("code") != 0:
++            raise MinerUServiceException(
++                internal_message=f"Local MinerU API error: {result.get('msg', 'Unknown')}"
++            )
++        md_content = ""
++        results = result.get("results", {})
++        for _key, val in results.items():
++            md_content = val.get("md_content", "")
++            break
++        os.makedirs(output_dir, exist_ok=True)
++        with open(os.path.join(output_dir, "full.md"), "w", encoding="utf-8") as mf:
++            mf.write(md_content)
++        local_logger.info("Local MinerU JSON extraction complete")
++
++
+ def _request_upload_target(pdf_url: str, filename: str) -> tuple[str, str, str]:
+     base_url = settings.MINERU_URL
+     quota_manager = get_mineru_quota_manager()
+@@ -392,6 +556,9 @@
+     output_dir: str,
+     s3_key: Optional[str] = None,
+ ) -> None:
++    if _MINERU_LOCAL_MODE:
++        return parse_via_local(pdf_url, filename, output_dir)
++
+     batch_id: str | None = None
+     token_id: str | None = None
+     resolved_s3_key = resolve_mineru_source_s3_key(
